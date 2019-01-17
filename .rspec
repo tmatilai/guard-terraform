@@ -1,0 +1,5 @@
+--color
+--default-path spec
+--format documentation
+--order random
+--require spec_helper

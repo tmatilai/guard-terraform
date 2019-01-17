@@ -1,0 +1,10 @@
+# Options and default values
+#
+#   all_on_start: true  - check all files on start?
+#   diff: true          - show diffs of the changes?
+#   write: false        - fix the formatting instead of just verifying?
+#
+guard :terraform, write: false do
+  watch(/\.tf$/)
+  watch(/\.tfvars$/)
+end

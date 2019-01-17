@@ -1,0 +1,37 @@
+AllCops:
+  DisplayStyleGuide: true
+  ExtraDetails: true
+  TargetRubyVersion: 2.3
+
+Layout/AlignHash:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table
+
+Metrics/BlockLength:
+  Exclude:
+    - '*.gemspec'
+    - 'spec/**/*_spec.rb'
+
+Metrics/ClassLength:
+  Severity: warning
+
+Metrics/LineLength:
+  Max: 100
+  Severity: warning
+
+Metrics/MethodLength:
+  Max: 13
+  Severity: warning
+
+Style/FrozenStringLiteralComment:
+  Exclude:
+    - 'lib/guard/*/templates/Guardfile'
+
+Style/NegatedIf:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
