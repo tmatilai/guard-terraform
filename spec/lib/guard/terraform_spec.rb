@@ -118,28 +118,32 @@ RSpec.describe Guard::Terraform, :silence_guard_ui do
     subject { plugin.run_all }
 
     context 'with pre-0.12 Terraform version', :terraform_pre_012 do
-      let(:paths) { %w[foo/bar.tf foo/baz.tf a/b/c.tfvars] }
+      let(:tfvars_files) { %w[foo.tfvars foo/baz.tfvars a/b/c.tfvars] }
 
       before do
-        allow(plugin).to receive(:all_tf_files) { paths }
+        allow(terraform).to receive(:find_tfvars_files).with(no_args) { tfvars_files }
       end
 
       include_examples 'options_to_flags'
 
-      it 'calls Terraform with all files' do
-        expect(terraform).to receive(:fmt).with(paths.dup, anything) { true }
+      it 'calls Terraform with root dir and tfvars files' do
+        paths = ['.'] + tfvars_files
+        expect(terraform).to receive(:fmt).with(paths, anything) { true }
+
         plugin.run_all
       end
 
       it 'calls Terraform without -recursive flag' do
         expect(terraform).to receive(:fmt)
           .with(anything, hash_excluding(:recursive)) { true }
+
         plugin.run_all
       end
 
       it 'throws :task_has_failed if Terraform returns false' do
         expect(terraform).to receive(:fmt) { false }
         expect(plugin).to receive(:throw).with(:task_has_failed)
+
         plugin.run_all
       end
     end
@@ -147,14 +151,16 @@ RSpec.describe Guard::Terraform, :silence_guard_ui do
     context 'with 0.12+ Terraform version', :terraform_post_012 do
       include_examples 'options_to_flags', :run_all, recursive: true
 
-      it 'calls Terraform without paths' do
-        expect(terraform).to receive(:fmt).with('.', anything) { true }
+      it 'calls Terraform with root dir' do
+        expect(terraform).to receive(:fmt).with(['.'], anything) { true }
+
         plugin.run_all
       end
 
       it 'throws :task_has_failed if terraform return false' do
         expect(terraform).to receive(:fmt) { false }
         expect(plugin).to receive(:throw).with(:task_has_failed)
+
         plugin.run_all
       end
     end

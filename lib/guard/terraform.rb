@@ -18,7 +18,9 @@ module Guard
       write:        false,  # fix the formatting instead of just verifying?
     }.freeze
 
-    attr_reader :options, :terraform, :tf_flags
+    attr_reader :options
+    attr_reader :terraform, :tf_flags
+    attr_reader :base_msg
 
     def initialize(**options)
       super
@@ -37,6 +39,7 @@ module Guard
       }
 
       @terraform = ::Terraform.new
+      @base_msg = "#{options[:write] ? 'Enforcing' : 'Inspecting'} Terraform formatting"
     end
 
     def start
@@ -49,16 +52,26 @@ module Guard
     end
 
     def run_all
+      UI.info("#{base_msg} for the whole project")
+
+      paths = ['.']
+      extra_flags = {}
+
       if terraform.pre_0_12?
         # Terraform v<0.12 does not check *.tfvars by default,
-        # so collect them to the list, too
-        run(all_tf_files)
+        # so find and check them separately
+        paths += terraform.find_tfvars_files
       else
-        run('.', recursive: true)
+        # Terraform 0.12+ does not check recursively by default
+        extra_flags[:recursive] = true
       end
+
+      run(paths, extra_flags)
     end
 
     def run_on_modifications(paths)
+      UI.info("#{base_msg} for #{paths.count} file#{'s' if paths.count != 1}")
+
       run(mungle_paths(paths))
     end
 
@@ -67,8 +80,7 @@ module Guard
     def run(paths, **extra_flags)
       flags = tf_flags.merge(extra_flags)
 
-      result = terraform.fmt(paths, flags) do |path, cmd|
-        UI.info("#{flags[:write] ? 'Enforcing' : 'Inspecting'} Terraform formatting: #{path}")
+      result = terraform.fmt(paths, flags) do |_, cmd|
         UI.debug(Shellwords.join(cmd))
       end
 
@@ -84,11 +96,6 @@ module Guard
         title: self.class.to_s,
         image: :failed
       )
-    end
-
-    # Returns list of all Terraform files
-    def all_tf_files
-      Dir['**/*.{tf,tfvars}']
     end
 
     # Terraform 0.12+ only supports checking directories,
