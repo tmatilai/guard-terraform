@@ -194,4 +194,85 @@ RSpec.describe Terraform do
       it { is_expected.to be_falsey }
     end
   end
+
+  describe '#find_tfvars_files' do
+    let(:fixtures_root) { File.expand_path('../fixtures', __dir__) }
+    let(:test_root) { File.join(fixtures_root, 'terraform') }
+    let(:test_files) { %w[foo/terraform.tfvars foo/bar/x.tfvars foo/bar/y.tfvars] }
+    let(:expected_paths) { test_files }
+
+    before do
+      @old_dir = Dir.pwd
+      Dir.chdir(test_root) if test_root
+    end
+
+    after do
+      Dir.chdir(@old_dir) if @old_dir
+    end
+
+    context 'without dir' do
+      subject { terraform.find_tfvars_files }
+
+      context 'with block' do
+        it 'yields the relative paths' do
+          paths = []
+          terraform.find_tfvars_files { |path| paths << path }
+
+          expect(paths).to match_array(expected_paths)
+        end
+      end
+
+      context 'without block' do
+        it 'returns the relative paths' do
+          is_expected.to match_array(expected_paths)
+        end
+      end
+    end
+
+    context 'with relative path' do
+      subject { terraform.find_tfvars_files(dir) }
+
+      let(:test_root) { fixtures_root }
+      let(:dir) { 'terraform' }
+      let(:expected_paths) { test_files.map { |path| "#{dir}/#{path}" } }
+
+      context 'with block' do
+        it 'yields the relative paths' do
+          paths = []
+          terraform.find_tfvars_files(dir) { |path| paths << path }
+
+          expect(paths).to match_array(expected_paths)
+        end
+      end
+
+      context 'without block' do
+        it 'returns the relative paths' do
+          is_expected.to match_array(expected_paths)
+        end
+      end
+    end
+
+    context 'with absolute path' do
+      subject { terraform.find_tfvars_files(dir) }
+
+      let(:test_root) { nil }
+      let(:dir) { File.join(fixtures_root, 'terraform') }
+      let(:expected_paths) { test_files.map { |path| "#{dir}/#{path}" } }
+
+      context 'with block' do
+        it 'yields the absolute paths' do
+          paths = []
+          terraform.find_tfvars_files(dir) { |path| paths << path }
+
+          expect(paths).to match_array(expected_paths)
+        end
+      end
+
+      context 'without block' do
+        it 'returns the absolute paths' do
+          is_expected.to match_array(expected_paths)
+        end
+      end
+    end
+  end
 end

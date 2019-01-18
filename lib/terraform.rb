@@ -31,6 +31,14 @@ class Terraform
     VersionRequirement.new('< 0.12.0-alpha').satisfied_by?(version)
   end
 
+  # Finds all *.tfvars files recursively in the given directory,
+  # or current working directory if not specified.
+  def find_tfvars_files(dir = nil, &block)
+    dir = "#{dir}/" if dir && !dir.empty? && dir[-1] != '/'
+
+    Dir.glob("#{dir}**/*.tfvars", &block)
+  end
+
   # Returns `Array` of CLI flags for Terraform
   # E.g. `{ foo: true, bar: 'baz' }` -> `[ '-foo=true', '-bar=baz' ]`
   def cli_flags(**flags)
