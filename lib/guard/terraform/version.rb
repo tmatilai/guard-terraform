@@ -3,6 +3,6 @@
 module Guard
   # Use own namespace to avoid inheriting from `Guard::Plugin`
   module TerraformVersion
-    VERSION = '1.0.1'
+    VERSION = '1.0.2.dev'
   end
 end
