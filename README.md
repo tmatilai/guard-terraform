@@ -9,6 +9,8 @@ A [Guard][] plugin for checking and optionally fixing [Terraform](https://www.te
 
 By running Guard, the formatting is automatically checked every time a `.tf` or `.tfvars` file is added or modified. By default all issues are printed as diff, but automatic rewrite is also possible, and maybe even recommended.
 
+This project also includes a [Rake](https://ruby.github.io/rake/) task.
+
 ## Installation
 
 This plugin requires Terraform to be installed on the system. This can be done e.g. [the official way](https://learn.hashicorp.com/terraform/getting-started/install.html), or with [chtf](https://github.com/Yleisradio/homebrew-terraforms#readme) on Mac. Guard::Terraform should be compatible with all (well, at least reasonably recent) Terraform versions.
@@ -77,7 +79,7 @@ end
 
 Available options and their default values:
 
-``` ruby
+```ruby
 all_on_start: true  # Check all files on start?
 
 diff:  true         # Show diffs of the changes?
@@ -89,6 +91,39 @@ Notes:
 * `diff` should be enabled at least if `write` is disabled, or it might be difficult to catch the issues.
 * When `write` is enabled and if Terraform rewrites a file, Guard will catch the modification and pass the file again to Guard::Terraform. So the file is checked again, but should of course pass this time.
 
+## Rake Integration
+
+To run Terraform format checks easily with [Rake](https://ruby.github.io/rake/), add the `rake` gem to the `Gemfile`, and this to a `Rakefile`:
+
+```ruby
+require 'terraform/rake_task'
+
+Terraform::RakeTask.new
+```
+
+Then you can run the task with:
+
+```sh
+$ bundle exec rake terraform
+```
+
+Another example that creates two tasks: one for checking and another for auto-correcting the formatting. Tasks can be listed with `bundle exec rake -T`.
+
+```ruby
+require 'terraform/rake_task'
+
+task default: 'terraform:check'
+
+namespace :terraform do
+  desc 'Check Terraform file formatting'
+  Terraform::RakeTask.new(:check)
+
+  desc 'Auto-correct Terraform file formatting'
+  Terraform::RakeTask.new(:fix) do |task|
+    task.write = true
+  end
+end
+```
 
 ## Contributing
 
