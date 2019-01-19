@@ -20,7 +20,6 @@ module Guard
 
     attr_reader :options
     attr_reader :terraform, :tf_flags
-    attr_reader :base_msg
 
     def initialize(**options)
       super
@@ -39,7 +38,6 @@ module Guard
       }
 
       @terraform = ::Terraform.new
-      @base_msg = "#{options[:write] ? 'Enforcing' : 'Inspecting'} Terraform formatting"
     end
 
     def start
@@ -52,8 +50,6 @@ module Guard
     end
 
     def run_all
-      UI.info("#{base_msg} for the whole project")
-
       paths = ['.']
       extra_flags = {}
 
@@ -70,14 +66,14 @@ module Guard
     end
 
     def run_on_modifications(paths)
-      UI.info("#{base_msg} for #{paths.count} file#{'s' if paths.count != 1}")
-
       run(mungle_paths(paths))
     end
 
     alias run_on_additions run_on_modifications
 
     def run(paths, **extra_flags)
+      print_pre_run_message(paths)
+
       flags = tf_flags.merge(extra_flags)
 
       result = terraform.fmt(paths, flags) do |_, cmd|
@@ -88,6 +84,21 @@ module Guard
 
       notify_failure
       throw(:task_has_failed)
+    end
+
+    def print_pre_run_message(paths)
+      @msg_format ||= "#{options[:write] ? 'Enforcing' : 'Inspecting'} " \
+                      'Terraform formatting for %s'
+
+      target = if paths.count > 1
+                 "#{paths.count} files or dirs"
+               elsif paths.first == '.'
+                 'the whole project'
+               else
+                 paths.first
+               end
+
+      UI.info(format(@msg_format, target))
     end
 
     def notify_failure
