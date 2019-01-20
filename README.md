@@ -9,7 +9,7 @@ A [Guard][] plugin for checking and optionally fixing [Terraform](https://www.te
 
 By running Guard, the formatting is automatically checked every time a `.tf` or `.tfvars` file is added or modified. By default all issues are printed as diff, but automatic rewrite is also possible, and maybe even recommended.
 
-This project also includes a [Rake](https://ruby.github.io/rake/) task.
+This project also includes a [Rake](https://ruby.github.io/rake/) task. This could be useful for example in some CI setups when running different linter tasks.
 
 ## Installation
 
