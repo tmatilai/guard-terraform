@@ -114,8 +114,8 @@ RSpec.describe Terraform::RakeTask do
               expect { Rake::Task[:terraform].execute }.not_to raise_error
             end
 
-            it 'does not print out error message' do
-              expect { Rake::Task[:terraform].execute }.not_to output(/failed/).to_stderr
+            it 'prints out error message' do
+              expect { Rake::Task[:terraform].execute }.to output(/Terraform .* failed/).to_stderr
             end
           end
         end
@@ -185,7 +185,7 @@ RSpec.describe Terraform::RakeTask do
             end
 
             it 'does not print out error message' do
-              expect { Rake::Task[:terraform].execute }.not_to output(/failed/).to_stderr
+              expect { Rake::Task[:terraform].execute }.to output(/Terraform .* failed/).to_stderr
             end
           end
         end
