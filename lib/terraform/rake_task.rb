@@ -63,9 +63,10 @@ class Terraform
       rake_output_message("#{write ? 'Auto-correcting' : 'Inspecting'}" \
                           " Terraform formatting for #{project_root}")
 
-      result = terraform.fmt(paths, tf_flags, &print_commands_proc)
+      return if terraform.fmt(paths, tf_flags, &print_commands_proc)
 
-      abort('Terraform file formatting check failed') if !result && fail_on_error
+      warn('Terraform file formatting check failed')
+      exit 1 if fail_on_error
     end
 
     def paths
