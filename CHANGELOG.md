@@ -1,4 +1,4 @@
-## 1.0.2 / _Not released yet_
+## 1.1.0 / 2019-01-24
 
 - Add `Terraform::RakeTask` helper to run Terraform format checks easily with [Rake](https://ruby.github.io/rake/) ([GH-3](https://github.com/tmatilai/guard-terraform/pull/3))
 
